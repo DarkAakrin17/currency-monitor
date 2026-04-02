@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EUR → INR · Yahoo Finance Tracker</title>
-  <meta name="description" content="EUR to INR live exchange rate tracker powered by Yahoo Finance" />
+  <title>EUR → INR · Google Finance Tracker</title>
+  <meta name="description" content="EUR to INR live exchange rate tracker powered by Google Finance" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -25,7 +25,6 @@
     }
     html, body { min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
 
-    /* Blobs */
     body::before, body::after { content:''; position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
     body::before { width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(124,110,252,.22) 0%,transparent 70%);animation:b1 14s ease-in-out infinite alternate; }
     body::after  { width:500px;height:500px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(6,182,212,.18) 0%,transparent 70%);animation:b2 18s ease-in-out infinite alternate; }
@@ -42,18 +41,11 @@
       font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
       background:rgba(6,182,212,.1);color:var(--cyan);
     }
-    .live-dot { width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:ld 1.8s ease-in-out infinite; }
+    .g-dot { width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:ld 1.8s ease-in-out infinite; }
     @keyframes ld { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
     header h1 { font-size:clamp(2rem,4.5vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
     .sub { font-size:13px;color:var(--muted);margin-top:8px; }
     .sub a { color:var(--cyan);text-decoration:none; }
-
-    /* Error banner */
-    .err-banner {
-      display:none;padding:12px 18px;border-radius:12px;margin-bottom:18px;
-      background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);
-      color:#fca5a5;font-size:13px;
-    }
 
     /* Card */
     .card { background:var(--glass);border:1px solid var(--border);border-radius:var(--r);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px); }
@@ -76,7 +68,7 @@
     .badge.up { background:rgba(52,211,153,.12);color:var(--up);border:1px solid rgba(52,211,153,.3); }
     .badge.dn { background:rgba(248,113,113,.12);color:var(--dn);border:1px solid rgba(248,113,113,.3); }
     .badge.fl { background:rgba(100,116,139,.12);color:var(--muted);border:1px solid rgba(100,116,139,.3); }
-    .rate-ts { font-size:11px;color:var(--muted);opacity:.7; }
+    .rate-ts { font-size:11px;color:var(--muted);opacity:.75; }
     .refresh-wrap { display:flex;align-items:center;gap:8px;margin-top:2px; }
     .rbtn {
       background:rgba(124,110,252,.15);border:1px solid rgba(124,110,252,.3);color:var(--accent);
@@ -118,18 +110,9 @@
     .sv { font-size:1.4rem;font-weight:700; }
     .sv.up{color:var(--up);} .sv.dn{color:var(--dn);}
 
-    /* Range tabs */
-    .range-tabs { display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap; }
-    .rtab {
-      padding:6px 16px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:none;
-      background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.09);
-      transition:background .2s,color .2s;
-    }
-    .rtab.active, .rtab:hover { background:rgba(124,110,252,.2);color:var(--accent);border-color:rgba(124,110,252,.35); }
-
     /* Chart */
     .chart-card { padding:26px 22px 18px; }
-    .ch-hdr { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px; }
+    .ch-hdr { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px; }
     .ch-ttl { font-size:14px;font-weight:600; }
     .ch-sub { font-size:11px;color:var(--muted);margin-top:3px; }
     .ch-wrap { position:relative;height:300px; }
@@ -142,26 +125,26 @@
 <div class="page">
 
   <header>
-    <div class="src-pill"><span class="live-dot"></span> Yahoo Finance · Live</div>
+    <div class="src-pill"><span class="g-dot"></span> Google Finance</div>
     <h1>EUR → INR Tracker</h1>
     <p class="sub">
-      Real-time data from <a href="https://finance.yahoo.com/quote/EURINR=X/" target="_blank">Yahoo Finance</a>
-      · History updated every 5 min
+      Rate &amp; history scraped from
+      <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a>
+      every 5 min via GitHub Actions
     </p>
   </header>
 
-  <div class="err-banner" id="errBanner"></div>
-
   <div class="top-grid">
-    <!-- Live rate -->
+
+    <!-- Current rate from rate.json -->
     <div class="card rate-card">
-      <div class="rate-lbl">Current Rate · Yahoo Finance</div>
+      <div class="rate-lbl">Current Rate · Google Finance</div>
       <div class="rate-val" id="rateVal">—</div>
       <div class="rate-pair">1 Euro = <span id="ratePair">…</span> Indian Rupees</div>
       <div id="badge"></div>
       <div class="rate-ts" id="rateTs">Fetching…</div>
       <div class="refresh-wrap">
-        <button class="rbtn" id="rbtn" onclick="loadLive()">
+        <button class="rbtn" id="rbtn" onclick="loadAll()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           Refresh
         </button>
@@ -169,48 +152,42 @@
       </div>
     </div>
 
-    <!-- History list -->
+    <!-- Recent history from history.json -->
     <div class="card hist-card">
       <div class="panel-hdr">
         <h2><span class="pdot"></span>Recent History</h2>
-        <span class="cnt-badge" id="cntBadge">— pts</span>
+        <span class="cnt-badge" id="cntBadge">—</span>
       </div>
       <div class="hlist" id="hlist">
         <div style="color:var(--muted);font-size:13px;padding:8px">Loading…</div>
       </div>
     </div>
+
   </div>
 
   <!-- Stats -->
   <div class="stats">
-    <div class="card sc"><div class="sl">Period Low</div><div class="sv" id="sLow">—</div></div>
-    <div class="card sc"><div class="sl">Period High</div><div class="sv" id="sHigh">—</div></div>
-    <div class="card sc"><div class="sl">Period Change</div><div class="sv" id="sChg">—</div></div>
-    <div class="card sc"><div class="sl">Data Points</div><div class="sv" id="sPts">—</div></div>
+    <div class="card sc"><div class="sl">24 h Low</div><div class="sv" id="sLow">—</div></div>
+    <div class="card sc"><div class="sl">24 h High</div><div class="sv" id="sHigh">—</div></div>
+    <div class="card sc"><div class="sl">24 h Change</div><div class="sv" id="sChg">—</div></div>
+    <div class="card sc"><div class="sl">Total Entries</div><div class="sv" id="sPts">—</div></div>
   </div>
 
-  <!-- Chart + range selector -->
+  <!-- Chart -->
   <div class="card chart-card">
     <div class="ch-hdr">
       <div>
-        <div class="ch-ttl"><span class="pdot"></span>Historical Rate · Yahoo Finance</div>
-        <div class="ch-sub" id="chSub">Loading…</div>
-      </div>
-      <div class="range-tabs">
-        <button class="rtab active" onclick="loadHistory('1d','5m')" >1D</button>
-        <button class="rtab"        onclick="loadHistory('5d','15m')" >5D</button>
-        <button class="rtab"        onclick="loadHistory('1mo','1h')" >1M</button>
-        <button class="rtab"        onclick="loadHistory('3mo','1d')" >3M</button>
-        <button class="rtab"        onclick="loadHistory('1y','1wk')">1Y</button>
+        <div class="ch-ttl"><span class="pdot"></span>Historical Rate · Google Finance</div>
+        <div class="ch-sub">Up to 300 data points · 5-minute intervals</div>
       </div>
     </div>
     <div class="ch-wrap"><canvas id="chart"></canvas></div>
   </div>
 
   <footer>
-    Data from <a href="https://finance.yahoo.com/quote/EURINR=X/" target="_blank">Yahoo Finance</a>
-    · Alerts via Telegram
-    · History stored by GitHub Actions
+    Data scraped from
+    <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a>
+    every 5 min by GitHub Actions · Alerts via Telegram
   </footer>
 </div>
 
@@ -219,115 +196,116 @@ const $    = id => document.getElementById(id);
 const fmt  = v  => '₹' + Number(v).toFixed(4);
 const fmtS = v  => Number(v).toFixed(4);
 
-// Yahoo Finance chart API — routed through corsproxy.io to bypass CORS
-const YF_DIRECT = 'https://query1.finance.yahoo.com/v8/finance/chart/EURINR=X';
-const PROXY     = 'https://corsproxy.io/?';
-
+let history   = [];
 let prevRate  = null;
 let chartInst = null;
-let countdown = 30;
+let countdown = 60;
 let timer;
 
-// ── Active tab tracking ───────────────────────────────────────────────────────
-document.querySelectorAll('.rtab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-
-// ── Show/hide error ───────────────────────────────────────────────────────────
-function showError(msg) {
-  const b = $('errBanner');
-  b.textContent = '⚠ ' + msg;
-  b.style.display = 'block';
-}
-function clearError() { $('errBanner').style.display = 'none'; }
-
-// ── Fetch from Yahoo Finance via CORS proxy ──────────────────────────────────
-async function yahooFetch(params) {
-  const yfUrl = YF_DIRECT + '?' + new URLSearchParams(params);
-  const url   = PROXY + encodeURIComponent(yfUrl);
-  const resp  = await fetch(url);
-  if (!resp.ok) throw new Error(`Yahoo Finance returned ${resp.status}`);
-  const json = await resp.json();
-  const res  = json?.chart?.result?.[0];
-  if (!res) throw new Error('No data in Yahoo Finance response');
-  return res;
-}
-
-// ── Live rate ─────────────────────────────────────────────────────────────────
-async function loadLive() {
+// ── Load both JSON files (cache-busted) ───────────────────────────────────────
+async function loadAll() {
   const btn = $('rbtn');
   btn.classList.add('spin');
   btn.disabled = true;
-  clearError();
+  clearInterval(timer);
+
   try {
-    const res  = await yahooFetch({ interval: '1m', range: '1d' });
-    const rate = res.meta.regularMarketPrice;
-    const mts  = res.meta.regularMarketTime * 1000;
+    const bust = '?_=' + Date.now();
+    const [rj, hj] = await Promise.all([
+      fetch('rate.json'    + bust).then(r => r.json()),
+      fetch('history.json' + bust).then(r => r.json()),
+    ]);
 
-    // Flicker animation
-    const rv = $('rateVal');
-    rv.style.opacity = '0';
-    setTimeout(() => { rv.textContent = fmt(rate); rv.style.opacity = '1'; }, 180);
-    $('ratePair').textContent = fmtS(rate);
-    $('rateTs').textContent   = 'Updated: ' + new Date(mts).toLocaleString('en-IN', {
-      day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true
-    });
-
-    // Change badge
-    const badgeEl = $('badge');
-    if (prevRate && prevRate > 0) {
-      const d   = rate - prevRate;
-      const pct = (d / prevRate * 100).toFixed(3);
-      const cls = Math.abs(d) < 0.002 ? 'fl' : d > 0 ? 'up' : 'dn';
-      const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '≈';
-      const sgn = d >= 0 ? '+' : '';
-      badgeEl.innerHTML = `<span class="badge ${cls}">${arr} ${sgn}${fmtS(d)} (${sgn}${pct}%)</span>`;
-    }
-    prevRate = rate;
-    resetCountdown();
+    renderRate(rj);
+    history = hj;
+    renderList();
+    renderStats();
+    renderChart();
   } catch (e) {
-    showError('Could not reach Yahoo Finance: ' + e.message + '. Using stored data.');
-    loadFallback();
+    $('rateTs').textContent = 'Error loading data: ' + e.message;
   } finally {
     btn.classList.remove('spin');
     btn.disabled = false;
+    startCountdown();
   }
 }
 
-// ── History chart ─────────────────────────────────────────────────────────────
-async function loadHistory(range, interval) {
-  $('chSub').textContent = 'Loading…';
-  try {
-    const res = await yahooFetch({ interval, range });
-    const ts  = res.timestamp ?? [];
-    const closes = res.indicators.quote[0].close ?? [];
+// ── Current rate ──────────────────────────────────────────────────────────────
+function renderRate(rj) {
+  const rate = rj.rate;
 
-    // Pair and clean
-    const points = ts
-      .map((t, i) => ({ t: t * 1000, v: closes[i] }))
-      .filter(p => p.v != null);
+  const rv = $('rateVal');
+  rv.style.opacity = '0';
+  setTimeout(() => { rv.textContent = fmt(rate); rv.style.opacity = '1'; }, 180);
+  $('ratePair').textContent = fmtS(rate);
+  $('rateTs').textContent   = 'Last fetched: ' + (rj.updated ?? '—');
 
-    if (!points.length) throw new Error('Empty series');
-
-    const labels = points.map(p => new Date(p.t));
-    const rates  = points.map(p => p.v);
-
-    renderChart(labels, rates);
-    renderStats(rates);
-    $('cntBadge').textContent = points.length + ' pts';
-    $('chSub').textContent = `${range} · ${interval} intervals · Yahoo Finance`;
-    clearError();
-  } catch (e) {
-    showError('History fetch failed: ' + e.message + ' — falling back to local history.json');
-    loadFallback();
+  const badgeEl = $('badge');
+  if (prevRate && prevRate > 0) {
+    const d   = rate - prevRate;
+    const pct = (d / prevRate * 100).toFixed(3);
+    const cls = Math.abs(d) < 0.002 ? 'fl' : d > 0 ? 'up' : 'dn';
+    const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '≈';
+    const sgn = d >= 0 ? '+' : '';
+    badgeEl.innerHTML = `<span class="badge ${cls}">${arr} ${sgn}${fmtS(d)} (${sgn}${pct}%)</span>`;
+  } else {
+    badgeEl.innerHTML = '';
   }
+  prevRate = rate;
 }
 
-// ── Chart renderer ────────────────────────────────────────────────────────────
-function renderChart(labels, rates) {
+// ── History list ──────────────────────────────────────────────────────────────
+function renderList() {
+  $('cntBadge').textContent = history.length + ' entries';
+  if (!history.length) {
+    $('hlist').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No history yet.</div>';
+    return;
+  }
+  const rev = [...history].reverse();
+  $('hlist').innerHTML = rev.map((d, i) => {
+    const prev = rev[i + 1];
+    const diff = prev ? d.rate - prev.rate : null;
+    let dHtml  = '';
+    if (diff !== null) {
+      const cls = Math.abs(diff) < 0.001 ? 'fl' : diff > 0 ? 'up' : 'dn';
+      const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '';
+      dHtml = `<span class="dv ${cls}">${arr} ${diff >= 0 ? '+' : ''}${fmtS(diff)}</span>`;
+    }
+    const ts = new Date(d.time).toLocaleString('en-IN', {
+      day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true
+    });
+    return `<div class="hrow">
+      <span class="ts">${ts}</span>
+      <span style="display:flex;align-items:center">
+        <span class="rv">${fmt(d.rate)}</span>${dHtml}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function renderStats() {
+  if (!history.length) return;
+  const cutoff = new Date(Date.now() - 864e5);
+  const win = history.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
+  const w   = win.length > 1 ? win : history.map(d => d.rate);
+
+  $('sLow').textContent  = fmt(Math.min(...w));
+  $('sHigh').textContent = fmt(Math.max(...w));
+  $('sPts').textContent  = history.length;
+
+  const chg = w.at(-1) - w.at(0);
+  const ce  = $('sChg');
+  ce.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
+  ce.className   = 'sv ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'dn' : '');
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+function renderChart() {
+  if (!history.length) return;
+  const labels = history.map(d => new Date(d.time));
+  const rates  = history.map(d => d.rate);
+
   const ctx  = $('chart').getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 300);
   grad.addColorStop(0, 'rgba(124,110,252,.35)');
@@ -356,9 +334,9 @@ function renderChart(labels, rates) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      interaction: { mode:'index', intersect:false },
       plugins: {
-        legend: { display: false },
+        legend: { display:false },
         tooltip: {
           backgroundColor: 'rgba(8,10,26,.95)',
           borderColor: 'rgba(255,255,255,.1)',
@@ -371,14 +349,14 @@ function renderChart(labels, rates) {
               day:'2-digit', month:'short', year:'numeric',
               hour:'2-digit', minute:'2-digit', hour12:true
             }),
-            label: item => '  ₹' + item.raw.toFixed(4)
+            label: item => '  ₹' + item.raw.toFixed(4) + '  ·  Google Finance'
           }
         }
       },
       scales: {
         x: {
           type: 'time',
-          time: { displayFormats: { minute:'HH:mm', hour:'dd MMM ha', day:'dd MMM', week:'dd MMM' } },
+          time: { displayFormats: { minute:'HH:mm', hour:'dd MMM ha', day:'dd MMM' } },
           grid:   { color:'rgba(255,255,255,.04)' },
           ticks:  { color:'#475569', maxTicksLimit:8, maxRotation:0 },
           border: { color:'rgba(255,255,255,.06)' }
@@ -393,79 +371,18 @@ function renderChart(labels, rates) {
   });
 }
 
-// ── Stats ─────────────────────────────────────────────────────────────────────
-function renderStats(rates) {
-  if (!rates.length) return;
-  $('sLow').textContent  = fmt(Math.min(...rates));
-  $('sHigh').textContent = fmt(Math.max(...rates));
-  $('sPts').textContent  = rates.length;
-  const chg = rates.at(-1) - rates.at(0);
-  const ce  = $('sChg');
-  ce.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
-  ce.className   = 'sv ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'dn' : '');
-}
-
-// ── Fallback: use local history.json if Yahoo is blocked ──────────────────────
-async function loadFallback() {
-  try {
-    const [rj, hj] = await Promise.all([
-      fetch('rate.json?_=' + Date.now()).then(r => r.json()),
-      fetch('history.json?_=' + Date.now()).then(r => r.json()),
-    ]);
-    // Render rate from rate.json
-    const rate = rj.rate;
-    $('rateVal').textContent  = fmt(rate);
-    $('ratePair').textContent = fmtS(rate);
-    $('rateTs').textContent   = 'Last scraped: ' + (rj.updated ?? '—');
-    prevRate = rate;
-
-    // Render history
-    if (hj.length) {
-      const labels = hj.map(d => new Date(d.time));
-      const rates  = hj.map(d => d.rate);
-      renderChart(labels, rates);
-      renderStats(rates);
-
-      // History list
-      const rev = [...hj].reverse();
-      $('cntBadge').textContent = hj.length + ' pts';
-      $('hlist').innerHTML = rev.map((d, i) => {
-        const prev = rev[i + 1];
-        const diff = prev ? d.rate - prev.rate : null;
-        let dHtml  = '';
-        if (diff !== null) {
-          const cls = Math.abs(diff) < 0.001 ? 'fl' : diff > 0 ? 'up' : 'dn';
-          const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '';
-          dHtml = `<span class="dv ${cls}">${arr} ${diff>=0?'+':''}${fmtS(diff)}</span>`;
-        }
-        const ts = new Date(d.time).toLocaleString('en-IN', {
-          day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true
-        });
-        return `<div class="hrow"><span class="ts">${ts}</span>
-          <span style="display:flex;align-items:center"><span class="rv">${fmt(d.rate)}</span>${dHtml}</span></div>`;
-      }).join('');
-    }
-  } catch { /* nothing more we can do */ }
-}
-
 // ── Countdown ─────────────────────────────────────────────────────────────────
-function resetCountdown() {
-  countdown = 30;
-  clearInterval(timer);
+function startCountdown() {
+  countdown = 60;
   timer = setInterval(() => {
     countdown--;
     $('nextLbl').textContent = `auto in ${countdown}s`;
-    if (countdown <= 0) { clearInterval(timer); loadLive(); }
+    if (countdown <= 0) { clearInterval(timer); loadAll(); }
   }, 1000);
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-(async () => {
-  await Promise.all([
-    loadLive(),
-    loadHistory('1d', '5m')   // default view: today, 5-min candles
-  ]);
-})();
+loadAll();
 </script>
 </body>
 </html>
