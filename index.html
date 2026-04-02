@@ -7,8 +7,7 @@
   <meta name="description" content="EUR to INR live exchange rate tracker powered by Google Finance" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -110,12 +109,7 @@
     .sv { font-size:1.4rem;font-weight:700; }
     .sv.up{color:var(--up);} .sv.dn{color:var(--dn);}
 
-    /* Chart */
-    .chart-card { padding:26px 22px 18px; }
-    .ch-hdr { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px; }
-    .ch-ttl { font-size:14px;font-weight:600; }
-    .ch-sub { font-size:11px;color:var(--muted);margin-top:3px; }
-    .ch-wrap { position:relative;height:300px; }
+
 
     footer { text-align:center;margin-top:48px;font-size:11px;color:var(--muted);opacity:.55; }
     footer a { color:inherit;text-decoration:none; }
@@ -173,16 +167,7 @@
     <div class="card sc"><div class="sl">Total Entries</div><div class="sv" id="sPts">—</div></div>
   </div>
 
-  <!-- Chart -->
-  <div class="card chart-card">
-    <div class="ch-hdr">
-      <div>
-        <div class="ch-ttl"><span class="pdot"></span>Historical Rate · Google Finance</div>
-        <div class="ch-sub">Up to 300 data points · 5-minute intervals</div>
-      </div>
-    </div>
-    <div class="ch-wrap"><canvas id="chart"></canvas></div>
-  </div>
+
 
   <footer>
     Data scraped from
@@ -198,7 +183,6 @@ const fmtS = v  => Number(v).toFixed(4);
 
 let history   = [];
 let prevRate  = null;
-let chartInst = null;
 let countdown = 60;
 let timer;
 
@@ -220,7 +204,6 @@ async function loadAll() {
     history = hj;
     renderList();
     renderStats();
-    renderChart();
   } catch (e) {
     $('rateTs').textContent = 'Error loading data: ' + e.message;
   } finally {
@@ -282,7 +265,6 @@ function renderList() {
     </div>`;
   }).join('');
 }
-  
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats() {
@@ -301,76 +283,7 @@ function renderStats() {
   ce.className   = 'sv ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'dn' : '');
 }
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
-function renderChart() {
-  if (!history.length) return;
-  const labels = history.map(d => new Date(d.time));
-  const rates  = history.map(d => d.rate);
 
-  const ctx  = $('chart').getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 300);
-  grad.addColorStop(0, 'rgba(124,110,252,.35)');
-  grad.addColorStop(1, 'rgba(124,110,252,.00)');
-
-  if (chartInst) chartInst.destroy();
-  chartInst = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'EUR → INR',
-        data: rates,
-        borderColor: '#7c6efc',
-        borderWidth: 2.5,
-        backgroundColor: grad,
-        fill: true,
-        tension: 0.35,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#7c6efc',
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode:'index', intersect:false },
-      plugins: {
-        legend: { display:false },
-        tooltip: {
-          backgroundColor: 'rgba(8,10,26,.95)',
-          borderColor: 'rgba(255,255,255,.1)',
-          borderWidth: 1,
-          titleColor: '#94a3b8',
-          bodyColor: '#e2e8f0',
-          padding: 12,
-          callbacks: {
-            title: items => new Date(items[0].label).toLocaleString('en-IN', {
-              day:'2-digit', month:'short', year:'numeric',
-              hour:'2-digit', minute:'2-digit', hour12:true
-            }),
-            label: item => '  ₹' + item.raw.toFixed(4) + '  ·  Google Finance'
-          }
-        }
-      },
-      scales: {
-        x: {
-          type: 'time',
-          time: { displayFormats: { minute:'HH:mm', hour:'dd MMM ha', day:'dd MMM' } },
-          grid:   { color:'rgba(255,255,255,.04)' },
-          ticks:  { color:'#475569', maxTicksLimit:8, maxRotation:0 },
-          border: { color:'rgba(255,255,255,.06)' }
-        },
-        y: {
-          grid:   { color:'rgba(255,255,255,.04)' },
-          ticks:  { color:'#475569', callback: v => '₹'+v.toFixed(2), maxTicksLimit:7 },
-          border: { color:'rgba(255,255,255,.06)' }
-        }
-      }
-    }
-  });
-}
 
 // ── Countdown ─────────────────────────────────────────────────────────────────
 function startCountdown() {
