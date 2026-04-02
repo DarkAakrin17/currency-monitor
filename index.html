@@ -1,56 +1,448 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>EUR → INR Tracker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EUR → INR Live Tracker</title>
+  <meta name="description" content="Real-time EUR to INR exchange rate monitor powered by Google Finance" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
   <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      background: #111;
-      color: white;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06070f;
+      --glass: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.10);
+      --accent: #7c6efc;
+      --accent2: #06b6d4;
+      --up: #34d399;
+      --down: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 18px;
     }
-    canvas {
-      max-width: 800px;
-      margin: auto;
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* Animated background blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 600px; height: 600px;
+      top: -200px; left: -200px;
+      background: radial-gradient(circle, rgba(124,110,252,0.25) 0%, transparent 70%);
+      animation: blob1 14s ease-in-out infinite alternate;
+    }
+    body::after {
+      width: 500px; height: 500px;
+      bottom: -150px; right: -150px;
+      background: radial-gradient(circle, rgba(6,182,212,0.20) 0%, transparent 70%);
+      animation: blob2 18s ease-in-out infinite alternate;
+    }
+    @keyframes blob1 { from { transform: translate(0,0) scale(1); } to { transform: translate(80px,60px) scale(1.15); } }
+    @keyframes blob2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-60px,-80px) scale(1.1); } }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+    .logo {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      opacity: 0.8;
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Glass card */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Rate hero */
+    .rate-hero {
+      padding: 36px 40px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .rate-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .rate-value {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(120deg, var(--accent2), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: opacity 0.3s;
+    }
+    .rate-pair {
+      font-size: 15px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .rate-updated {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 14px;
+      opacity: 0.7;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 14px;
+    }
+    .badge.up   { background: rgba(52,211,153,0.15); color: var(--up);   border: 1px solid rgba(52,211,153,0.3);  }
+    .badge.down { background: rgba(248,113,113,0.15); color: var(--down); border: 1px solid rgba(248,113,113,0.3); }
+    .badge.flat { background: rgba(100,116,139,0.15); color: var(--muted); border: 1px solid rgba(100,116,139,0.3); }
+
+    /* Stats row */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      padding: 22px 20px;
+      text-align: center;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-value.up   { color: var(--up);   }
+    .stat-value.down { color: var(--down); }
+
+    /* Chart card */
+    .chart-card {
+      padding: 28px 24px 20px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .chart-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 2s ease-in-out infinite;
+      margin-right: 6px;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.6); }
+      50%      { box-shadow: 0 0 0 6px rgba(6,182,212,0); }
+    }
+    .chart-wrap { position: relative; height: 320px; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      font-size: 12px;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+    footer a { color: inherit; text-decoration: none; }
+
+    /* Skeleton loader */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    @media (max-width: 540px) {
+      .rate-hero { padding: 28px 20px; }
+      .chart-card { padding: 20px 14px 14px; }
     }
   </style>
 </head>
 <body>
+<div class="page">
 
-<h1>💱 EUR → INR Monitor</h1>
-<h2 id="current">Loading...</h2>
+  <header>
+    <span class="logo">Live Exchange Monitor</span>
+    <h1>EUR → INR Tracker</h1>
+    <p class="subtitle">Powered by Google Finance · Updates every 5 minutes</p>
+  </header>
 
-<canvas id="chart"></canvas>
+  <!-- Hero rate -->
+  <div class="card rate-hero">
+    <div class="rate-label">Current Exchange Rate</div>
+    <div class="rate-value" id="rateDisplay">—</div>
+    <div class="rate-pair">1 Euro = <span id="ratePairText">…</span> Indian Rupees</div>
+    <div id="changeBadge"></div>
+    <div class="rate-updated" id="updatedAt"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="card stat-card">
+      <div class="stat-label">24 h Low</div>
+      <div class="stat-value" id="statLow">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">24 h High</div>
+      <div class="stat-value" id="statHigh">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">24 h Change</div>
+      <div class="stat-value" id="statChange">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-label">Data Points</div>
+      <div class="stat-value" id="statPoints">—</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title"><span class="dot"></span>Rate History</div>
+        <div class="chart-sub">Last 300 recorded entries (5-min intervals)</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="rateChart"></canvas>
+    </div>
+  </div>
+
+  <footer>
+    Data sourced from <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a> ·
+    Alerts delivered via Telegram ·
+    &copy; EUR Monitor
+  </footer>
+
+</div>
 
 <script>
-async function loadData() {
-  const res = await fetch('history.json');
-  const data = await res.json();
+(async () => {
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const fmt  = v => v !== null && v !== undefined ? '₹' + Number(v).toFixed(4) : '—';
+  const fmtS = v => v !== null && v !== undefined ? Number(v).toFixed(4) : '—';
+  const el   = id => document.getElementById(id);
 
-  const labels = data.map(d => new Date(d.time).toLocaleTimeString());
-  const rates = data.map(d => d.rate);
+  // ── Load data ────────────────────────────────────────────────────────────
+  let data = [];
+  try {
+    const res = await fetch('history.json');
+    data = await res.json();
+  } catch {
+    el('rateDisplay').textContent = 'Error loading data';
+    return;
+  }
 
-  document.getElementById("current").innerText =
-    "Current Rate: ₹" + rates[rates.length - 1];
+  if (!data.length) {
+    el('rateDisplay').textContent = 'No data yet';
+    return;
+  }
 
-  new Chart(document.getElementById("chart"), {
+  const rates  = data.map(d => d.rate);
+  const labels = data.map(d => new Date(d.time));
+
+  // ── Current rate ─────────────────────────────────────────────────────────
+  const current  = rates.at(-1);
+  el('rateDisplay').textContent = fmt(current);
+  el('ratePairText').textContent = fmtS(current);
+
+  // Updated at
+  const lastTime = labels.at(-1);
+  el('updatedAt').textContent = 'Last updated: ' + lastTime.toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
+
+  // ── Change badge ─────────────────────────────────────────────────────────
+  const first = rates.at(0);
+  const diff  = current - first;
+  const pct   = (diff / first * 100).toFixed(2);
+  const badgeEl = el('changeBadge');
+  if (Math.abs(diff) < 0.005) {
+    badgeEl.innerHTML = `<span class="badge flat">≈ Stable</span>`;
+  } else if (diff > 0) {
+    badgeEl.innerHTML = `<span class="badge up">▲ +${fmtS(diff)} (${pct}%) vs first entry</span>`;
+  } else {
+    badgeEl.innerHTML = `<span class="badge down">▼ ${fmtS(diff)} (${pct}%) vs first entry</span>`;
+  }
+
+  // ── 24 h window stats ────────────────────────────────────────────────────
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recent = data.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
+  const window = recent.length > 1 ? recent : rates;
+
+  const lo  = Math.min(...window);
+  const hi  = Math.max(...window);
+  const chg = window.at(-1) - window.at(0);
+
+  el('statLow').textContent  = fmt(lo);
+  el('statHigh').textContent = fmt(hi);
+
+  const chgEl = el('statChange');
+  chgEl.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
+  chgEl.className = 'stat-value ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'down' : '');
+
+  el('statPoints').textContent = data.length;
+
+  // ── Chart ─────────────────────────────────────────────────────────────────
+  const ctx = el('rateChart').getContext('2d');
+
+  // Gradient fill
+  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  gradient.addColorStop(0, 'rgba(124,110,252,0.35)');
+  gradient.addColorStop(1, 'rgba(124,110,252,0.00)');
+
+  new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels,
+      labels,
       datasets: [{
         label: 'EUR → INR',
         data: rates,
-        borderColor: 'cyan',
-        fill: false,
-        tension: 0.3
+        borderColor: '#7c6efc',
+        borderWidth: 2.5,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#7c6efc',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
       }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,12,28,0.92)',
+          borderColor: 'rgba(255,255,255,0.10)',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#e2e8f0',
+          padding: 12,
+          callbacks: {
+            title: items => {
+              const d = new Date(items[0].label);
+              return d.toLocaleString('en-IN', {
+                day: '2-digit', month: 'short',
+                hour: '2-digit', minute: '2-digit', hour12: true
+              });
+            },
+            label: item => '  ₹' + item.raw.toFixed(4)
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { tooltipFormat: 'dd MMM, hh:mm a', displayFormats: { hour: 'dd MMM ha', day: 'dd MMM' } },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#475569', maxTicksLimit: 8, maxRotation: 0 },
+          border: { color: 'rgba(255,255,255,0.06)' }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: {
+            color: '#475569',
+            callback: v => '₹' + v.toFixed(2),
+            maxTicksLimit: 7
+          },
+          border: { color: 'rgba(255,255,255,0.06)' }
+        }
+      }
     }
   });
-}
-
-loadData();
+})();
 </script>
-
 </body>
 </html>
