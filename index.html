@@ -234,6 +234,15 @@ async function loadAll() {
 function renderRate(rj) {
   const rate = rj.rate;
 
+  // Skip placeholder zero value
+  if (!rate || rate <= 0) {
+    $('rateVal').textContent  = '—';
+    $('ratePair').textContent = 'No data yet — waiting for first scrape';
+    $('rateTs').textContent   = 'GitHub Actions will populate this shortly';
+    $('badge').innerHTML      = '';
+    return;
+  }
+
   const rv = $('rateVal');
   rv.style.opacity = '0';
   setTimeout(() => { rv.textContent = fmt(rate); rv.style.opacity = '1'; }, 180);
@@ -285,14 +294,17 @@ function renderList() {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats() {
-  if (!history.length) return;
+  // Only use entries with a valid positive rate and a parseable timestamp
+  const valid = history.filter(d => d.rate > 0 && !isNaN(new Date(d.time)));
+  $('sPts').textContent = valid.length;
+  if (valid.length < 1) return;
+
   const cutoff = new Date(Date.now() - 864e5);
-  const win = history.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
-  const w   = win.length > 1 ? win : history.map(d => d.rate);
+  const win = valid.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
+  const w   = win.length > 0 ? win : valid.map(d => d.rate);
 
   $('sLow').textContent  = fmt(Math.min(...w));
   $('sHigh').textContent = fmt(Math.max(...w));
-  $('sPts').textContent  = history.length;
 
   const chg = w.at(-1) - w.at(0);
   const ce  = $('sChg');
@@ -302,11 +314,33 @@ function renderStats() {
 
 // ── Chart ─────────────────────────────────────────────────────────────────────
 function renderChart() {
-  if (!history.length) return;
-  const labels = history.map(d => new Date(d.time));
-  const rates  = history.map(d => d.rate);
+  // Filter to only valid entries: positive rate + parseable ISO timestamp
+  const valid = history.filter(d => d.rate > 0 && !isNaN(new Date(d.time)));
 
-  const ctx  = $('chart').getContext('2d');
+  const wrap = $('chart').parentElement;
+  if (!valid.length) {
+    if (chartInst) { chartInst.destroy(); chartInst = null; }
+    wrap.innerHTML = `
+      <div style="height:300px;display:flex;flex-direction:column;align-items:center;
+                  justify-content:center;gap:10px;color:var(--muted)">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span style="font-size:13px">No history yet — GitHub Actions will populate data shortly</span>
+      </div>`;
+    return;
+  }
+
+  // Re-attach canvas if it was replaced by the empty state
+  if (!wrap.querySelector('canvas')) {
+    wrap.innerHTML = '<canvas id="chart"></canvas>';
+  }
+
+  const labels = valid.map(d => new Date(d.time));
+  const rates  = valid.map(d => d.rate);
+
+  const ctx  = document.getElementById('chart').getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 300);
   grad.addColorStop(0, 'rgba(124,110,252,.35)');
   grad.addColorStop(1, 'rgba(124,110,252,.00)');
