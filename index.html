@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,18 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #06070f;
-      --glass: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.09);
+      --glass: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.09);
       --accent: #7c6efc;
       --cyan: #06b6d4;
       --up: #34d399;
@@ -31,737 +23,366 @@
       --muted: #64748b;
       --r: 18px;
     }
+    html, body { min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
 
-    html,
-    body {
-      min-height: 100vh;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
+    body::before, body::after { content:''; position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+    body::before { width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(124,110,252,.22) 0%,transparent 70%);animation:b1 14s ease-in-out infinite alternate; }
+    body::after  { width:500px;height:500px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(6,182,212,.18) 0%,transparent 70%);animation:b2 18s ease-in-out infinite alternate; }
+    @keyframes b1 { to { transform:translate(80px,60px) scale(1.15); } }
+    @keyframes b2 { to { transform:translate(-60px,-80px) scale(1.1); } }
 
-    body::before,
-    body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    body::before {
-      width: 600px;
-      height: 600px;
-      top: -200px;
-      left: -200px;
-      background: radial-gradient(circle, rgba(124, 110, 252, .22) 0%, transparent 70%);
-      animation: b1 14s ease-in-out infinite alternate;
-    }
-
-    body::after {
-      width: 500px;
-      height: 500px;
-      bottom: -150px;
-      right: -150px;
-      background: radial-gradient(circle, rgba(6, 182, 212, .18) 0%, transparent 70%);
-      animation: b2 18s ease-in-out infinite alternate;
-    }
-
-    @keyframes b1 {
-      to {
-        transform: translate(80px, 60px) scale(1.15);
-      }
-    }
-
-    @keyframes b2 {
-      to {
-        transform: translate(-60px, -80px) scale(1.1);
-      }
-    }
-
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 48px 24px 72px;
-    }
+    .page { position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:48px 24px 72px; }
 
     /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
+    header { text-align:center;margin-bottom:40px; }
     .src-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 14px;
-      padding: 5px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(6, 182, 212, .28);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      background: rgba(6, 182, 212, .1);
-      color: var(--cyan);
+      display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;
+      padding:5px 14px;border-radius:999px;border:1px solid rgba(6,182,212,.28);
+      font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+      background:rgba(6,182,212,.1);color:var(--cyan);
     }
-
-    .g-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--cyan);
-      animation: ld 1.8s ease-in-out infinite;
-    }
-
-    @keyframes ld {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1)
-      }
-
-      50% {
-        opacity: .4;
-        transform: scale(.7)
-      }
-    }
-
-    header h1 {
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      background: linear-gradient(135deg, #fff 30%, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
-    .sub a {
-      color: var(--cyan);
-      text-decoration: none;
-    }
+    .g-dot { width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:ld 1.8s ease-in-out infinite; }
+    @keyframes ld { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+    header h1 { font-size:clamp(2rem,4.5vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .sub { font-size:13px;color:var(--muted);margin-top:8px; }
+    .sub a { color:var(--cyan);text-decoration:none; }
 
     /* Card */
-    .card {
-      background: var(--glass);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
+    .card { background:var(--glass);border:1px solid var(--border);border-radius:var(--r);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px); }
 
     /* Top grid */
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    @media(max-width:640px) {
-      .top-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .top-grid { display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px; }
+    @media(max-width:640px){ .top-grid{grid-template-columns:1fr;} }
 
     /* Rate card */
-    .rate-card {
-      padding: 36px 28px 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 10px;
-    }
-
-    .rate-lbl {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
+    .rate-card { padding:36px 28px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px; }
+    .rate-lbl { font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted); }
     .rate-val {
-      font-size: clamp(3rem, 7vw, 5rem);
-      font-weight: 700;
-      line-height: 1;
-      background: linear-gradient(120deg, var(--cyan), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      transition: opacity .2s;
+      font-size:clamp(3rem,7vw,5rem);font-weight:700;line-height:1;
+      background:linear-gradient(120deg,var(--cyan),var(--accent));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      transition:opacity .2s;
     }
-
-    .rate-pair {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 5px 13px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge.up {
-      background: rgba(52, 211, 153, .12);
-      color: var(--up);
-      border: 1px solid rgba(52, 211, 153, .3);
-    }
-
-    .badge.dn {
-      background: rgba(248, 113, 113, .12);
-      color: var(--dn);
-      border: 1px solid rgba(248, 113, 113, .3);
-    }
-
-    .badge.fl {
-      background: rgba(100, 116, 139, .12);
-      color: var(--muted);
-      border: 1px solid rgba(100, 116, 139, .3);
-    }
-
-    .rate-ts {
-      font-size: 11px;
-      color: var(--muted);
-      opacity: .75;
-    }
-
-    .refresh-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 2px;
-    }
-
+    .rate-pair { font-size:13px;color:var(--muted); }
+    .badge { display:inline-flex;align-items:center;gap:4px;padding:5px 13px;border-radius:999px;font-size:12px;font-weight:600; }
+    .badge.up { background:rgba(52,211,153,.12);color:var(--up);border:1px solid rgba(52,211,153,.3); }
+    .badge.dn { background:rgba(248,113,113,.12);color:var(--dn);border:1px solid rgba(248,113,113,.3); }
+    .badge.fl { background:rgba(100,116,139,.12);color:var(--muted);border:1px solid rgba(100,116,139,.3); }
+    .rate-ts { font-size:11px;color:var(--muted);opacity:.75; }
+    .refresh-wrap { display:flex;align-items:center;gap:8px;margin-top:2px; }
     .rbtn {
-      background: rgba(124, 110, 252, .15);
-      border: 1px solid rgba(124, 110, 252, .3);
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: background .2s, transform .15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      background:rgba(124,110,252,.15);border:1px solid rgba(124,110,252,.3);color:var(--accent);
+      font-size:12px;font-weight:600;padding:6px 16px;border-radius:999px;cursor:pointer;
+      transition:background .2s,transform .15s;display:inline-flex;align-items:center;gap:6px;
     }
-
-    .rbtn:hover {
-      background: rgba(124, 110, 252, .28);
-    }
-
-    .rbtn:active {
-      transform: scale(.96);
-    }
-
-    .rbtn.spin svg {
-      animation: spin .7s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .next-lbl {
-      font-size: 10px;
-      color: var(--muted);
-      opacity: .65;
-    }
+    .rbtn:hover { background:rgba(124,110,252,.28); }
+    .rbtn:active { transform:scale(.96); }
+    .rbtn.spin svg { animation:spin .7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .next-lbl { font-size:10px;color:var(--muted);opacity:.65; }
 
     /* History panel */
-    .hist-card {
-      padding: 26px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .panel-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .panel-hdr h2 {
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .pdot {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pdp 2s ease-in-out infinite;
-    }
-
-    @keyframes pdp {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(124, 110, 252, .6)
-      }
-
-      50% {
-        box-shadow: 0 0 0 6px rgba(124, 110, 252, 0)
-      }
-    }
-
-    .cnt-badge {
-      font-size: 11px;
-      color: var(--muted);
-      background: rgba(255, 255, 255, .06);
-      padding: 2px 9px;
-      border-radius: 999px;
-    }
-
-    .hlist {
-      overflow-y: auto;
-      max-height: 260px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, .1) transparent;
-    }
-
-    .hlist::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .hlist::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, .1);
-      border-radius: 4px;
-    }
-
+    .hist-card { padding:26px 22px;display:flex;flex-direction:column;gap:14px; }
+    .panel-hdr { display:flex;justify-content:space-between;align-items:center; }
+    .panel-hdr h2 { font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px; }
+    .pdot { display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pdp 2s ease-in-out infinite; }
+    @keyframes pdp { 0%,100%{box-shadow:0 0 0 0 rgba(124,110,252,.6)} 50%{box-shadow:0 0 0 6px rgba(124,110,252,0)} }
+    .cnt-badge { font-size:11px;color:var(--muted);background:rgba(255,255,255,.06);padding:2px 9px;border-radius:999px; }
+    .hlist { overflow-y:auto;max-height:260px;display:flex;flex-direction:column;gap:5px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent; }
+    .hlist::-webkit-scrollbar { width:4px; }
+    .hlist::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1);border-radius:4px; }
     .hrow {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, .03);
-      border: 1px solid rgba(255, 255, 255, .055);
-      font-size: 12.5px;
-      transition: background .15s;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:8px 12px;border-radius:10px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.055);
+      font-size:12.5px;transition:background .15s;
     }
-
-    .hrow:hover {
-      background: rgba(255, 255, 255, .07);
-    }
-
-    .hrow .ts {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .hrow .rv {
-      font-weight: 600;
-    }
-
-    .hrow .dv {
-      font-size: 11px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
-    .dv.up {
-      color: var(--up);
-    }
-
-    .dv.dn {
-      color: var(--dn);
-    }
-
-    .dv.fl {
-      color: var(--muted);
-    }
+    .hrow:hover { background:rgba(255,255,255,.07); }
+    .hrow .ts { color:var(--muted);font-size:11px; }
+    .hrow .rv { font-weight:600; }
+    .hrow .dv { font-size:11px;font-weight:600;margin-left:8px; }
+    .dv.up{color:var(--up);} .dv.dn{color:var(--dn);} .dv.fl{color:var(--muted);}
 
     /* Stats */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .sc {
-      padding: 22px 16px;
-      text-align: center;
-    }
-
-    .sl {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .sv {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .sv.up {
-      color: var(--up);
-    }
-
-    .sv.dn {
-      color: var(--dn);
-    }
+    .stats { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:18px; }
+    .sc { padding:22px 16px;text-align:center; }
+    .sl { font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
+    .sv { font-size:1.4rem;font-weight:700; }
+    .sv.up{color:var(--up);} .sv.dn{color:var(--dn);}
 
     /* Chart */
-    .chart-card {
-      padding: 26px 22px 18px;
-    }
+    .chart-card { padding:26px 22px 18px; }
+    .ch-hdr { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px; }
+    .ch-ttl { font-size:14px;font-weight:600; }
+    .ch-sub { font-size:11px;color:var(--muted);margin-top:3px; }
+    .ch-wrap { position:relative;height:300px; }
 
-    .ch-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .ch-ttl {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .ch-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    .ch-wrap {
-      position: relative;
-      height: 300px;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 48px;
-      font-size: 11px;
-      color: var(--muted);
-      opacity: .55;
-    }
-
-    footer a {
-      color: inherit;
-      text-decoration: none;
-    }
+    footer { text-align:center;margin-top:48px;font-size:11px;color:var(--muted);opacity:.55; }
+    footer a { color:inherit;text-decoration:none; }
   </style>
 </head>
-
 <body>
-  <div class="page">
+<div class="page">
 
-    <header>
-      <div class="src-pill"><span class="g-dot"></span> Google Finance</div>
-      <h1>EUR → INR Tracker</h1>
-      <p class="sub">
-        Rate &amp; history scraped from
-        <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a>
-        every 5 min via GitHub Actions
-      </p>
-    </header>
-
-    <div class="top-grid">
-
-      <!-- Current rate from rate.json -->
-      <div class="card rate-card">
-        <div class="rate-lbl">Current Rate · Google Finance</div>
-        <div class="rate-val" id="rateVal">—</div>
-        <div class="rate-pair">1 Euro = <span id="ratePair">…</span> Indian Rupees</div>
-        <div id="badge"></div>
-        <div class="rate-ts" id="rateTs">Fetching…</div>
-        <div class="refresh-wrap">
-          <button class="rbtn" id="rbtn" onclick="loadAll()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            Refresh
-          </button>
-          <span class="next-lbl" id="nextLbl"></span>
-        </div>
-      </div>
-
-      <!-- Recent history from history.json -->
-      <div class="card hist-card">
-        <div class="panel-hdr">
-          <h2><span class="pdot"></span>Recent History</h2>
-          <span class="cnt-badge" id="cntBadge">—</span>
-        </div>
-        <div class="hlist" id="hlist">
-          <div style="color:var(--muted);font-size:13px;padding:8px">Loading…</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Stats -->
-    <div class="stats">
-      <div class="card sc">
-        <div class="sl">24 h Low</div>
-        <div class="sv" id="sLow">—</div>
-      </div>
-      <div class="card sc">
-        <div class="sl">24 h High</div>
-        <div class="sv" id="sHigh">—</div>
-      </div>
-      <div class="card sc">
-        <div class="sl">24 h Change</div>
-        <div class="sv" id="sChg">—</div>
-      </div>
-      <div class="card sc">
-        <div class="sl">Total Entries</div>
-        <div class="sv" id="sPts">—</div>
-      </div>
-    </div>
-
-    <!-- Chart -->
-    <div class="card chart-card">
-      <div class="ch-hdr">
-        <div>
-          <div class="ch-ttl"><span class="pdot"></span>Historical Rate · Google Finance</div>
-          <div class="ch-sub">Up to 300 data points · 5-minute intervals</div>
-        </div>
-      </div>
-      <div class="ch-wrap"><canvas id="chart"></canvas></div>
-    </div>
-
-    <footer>
-      Data scraped from
+  <header>
+    <div class="src-pill"><span class="g-dot"></span> Google Finance</div>
+    <h1>EUR → INR Tracker</h1>
+    <p class="sub">
+      Rate &amp; history scraped from
       <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a>
-      every 5 min by GitHub Actions · Alerts via Telegram
-    </footer>
+      every 5 min via GitHub Actions
+    </p>
+  </header>
+
+  <div class="top-grid">
+
+    <!-- Current rate from rate.json -->
+    <div class="card rate-card">
+      <div class="rate-lbl">Current Rate · Google Finance</div>
+      <div class="rate-val" id="rateVal">—</div>
+      <div class="rate-pair">1 Euro = <span id="ratePair">…</span> Indian Rupees</div>
+      <div id="badge"></div>
+      <div class="rate-ts" id="rateTs">Fetching…</div>
+      <div class="refresh-wrap">
+        <button class="rbtn" id="rbtn" onclick="loadAll()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+        <span class="next-lbl" id="nextLbl"></span>
+      </div>
+    </div>
+
+    <!-- Recent history from history.json -->
+    <div class="card hist-card">
+      <div class="panel-hdr">
+        <h2><span class="pdot"></span>Recent History</h2>
+        <span class="cnt-badge" id="cntBadge">—</span>
+      </div>
+      <div class="hlist" id="hlist">
+        <div style="color:var(--muted);font-size:13px;padding:8px">Loading…</div>
+      </div>
+    </div>
+
   </div>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    const fmt = v => '₹' + Number(v).toFixed(4);
-    const fmtS = v => Number(v).toFixed(4);
+  <!-- Stats -->
+  <div class="stats">
+    <div class="card sc"><div class="sl">24 h Low</div><div class="sv" id="sLow">—</div></div>
+    <div class="card sc"><div class="sl">24 h High</div><div class="sv" id="sHigh">—</div></div>
+    <div class="card sc"><div class="sl">24 h Change</div><div class="sv" id="sChg">—</div></div>
+    <div class="card sc"><div class="sl">Total Entries</div><div class="sv" id="sPts">—</div></div>
+  </div>
 
-    let history = [];
-    let prevRate = null;
-    let chartInst = null;
-    let countdown = 60;
-    let timer;
+  <!-- Chart -->
+  <div class="card chart-card">
+    <div class="ch-hdr">
+      <div>
+        <div class="ch-ttl"><span class="pdot"></span>Historical Rate · Google Finance</div>
+        <div class="ch-sub">Up to 300 data points · 5-minute intervals</div>
+      </div>
+    </div>
+    <div class="ch-wrap"><canvas id="chart"></canvas></div>
+  </div>
 
-    // ── Load both JSON files (cache-busted) ───────────────────────────────────────
-    async function loadAll() {
-      const btn = $('rbtn');
-      btn.classList.add('spin');
-      btn.disabled = true;
-      clearInterval(timer);
+  <footer>
+    Data scraped from
+    <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a>
+    every 5 min by GitHub Actions · Alerts via Telegram
+  </footer>
+</div>
 
-      try {
-        const bust = '?_=' + Date.now();
-        const [rj, hj] = await Promise.all([
-          fetch('rate.json' + bust).then(r => r.json()),
-          fetch('history.json' + bust).then(r => r.json()),
-        ]);
+<script>
+const $    = id => document.getElementById(id);
+const fmt  = v  => '₹' + Number(v).toFixed(4);
+const fmtS = v  => Number(v).toFixed(4);
 
-        renderRate(rj);
-        history = hj;
-        renderList();
-        renderStats();
-        renderChart();
-      } catch (e) {
-        $('rateTs').textContent = 'Error loading data: ' + e.message;
-      } finally {
-        btn.classList.remove('spin');
-        btn.disabled = false;
-        startCountdown();
-      }
+let history   = [];
+let prevRate  = null;
+let chartInst = null;
+let countdown = 60;
+let timer;
+
+// ── Load both JSON files (cache-busted) ───────────────────────────────────────
+async function loadAll() {
+  const btn = $('rbtn');
+  btn.classList.add('spin');
+  btn.disabled = true;
+  clearInterval(timer);
+
+  try {
+    const bust = '?_=' + Date.now();
+    const [rj, hj] = await Promise.all([
+      fetch('rate.json'    + bust).then(r => r.json()),
+      fetch('history.json' + bust).then(r => r.json()),
+    ]);
+
+    renderRate(rj);
+    history = hj;
+    renderList();
+    renderStats();
+    renderChart();
+  } catch (e) {
+    $('rateTs').textContent = 'Error loading data: ' + e.message;
+  } finally {
+    btn.classList.remove('spin');
+    btn.disabled = false;
+    startCountdown();
+  }
+}
+
+// ── Current rate ──────────────────────────────────────────────────────────────
+function renderRate(rj) {
+  const rate = rj.rate;
+
+  const rv = $('rateVal');
+  rv.style.opacity = '0';
+  setTimeout(() => { rv.textContent = fmt(rate); rv.style.opacity = '1'; }, 180);
+  $('ratePair').textContent = fmtS(rate);
+  $('rateTs').textContent   = 'Last fetched: ' + (rj.updated ?? '—');
+
+  const badgeEl = $('badge');
+  if (prevRate && prevRate > 0) {
+    const d   = rate - prevRate;
+    const pct = (d / prevRate * 100).toFixed(3);
+    const cls = Math.abs(d) < 0.002 ? 'fl' : d > 0 ? 'up' : 'dn';
+    const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '≈';
+    const sgn = d >= 0 ? '+' : '';
+    badgeEl.innerHTML = `<span class="badge ${cls}">${arr} ${sgn}${fmtS(d)} (${sgn}${pct}%)</span>`;
+  } else {
+    badgeEl.innerHTML = '';
+  }
+  prevRate = rate;
+}
+
+// ── History list ──────────────────────────────────────────────────────────────
+function renderList() {
+  $('cntBadge').textContent = history.length + ' entries';
+  if (!history.length) {
+    $('hlist').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No history yet.</div>';
+    return;
+  }
+  const rev = [...history].reverse();
+  $('hlist').innerHTML = rev.map((d, i) => {
+    const prev = rev[i + 1];
+    const diff = prev ? d.rate - prev.rate : null;
+    let dHtml  = '';
+    if (diff !== null) {
+      const cls = Math.abs(diff) < 0.001 ? 'fl' : diff > 0 ? 'up' : 'dn';
+      const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '';
+      dHtml = `<span class="dv ${cls}">${arr} ${diff >= 0 ? '+' : ''}${fmtS(diff)}</span>`;
     }
-
-    // ── Current rate ──────────────────────────────────────────────────────────────
-    function renderRate(rj) {
-      const rate = rj.rate;
-
-      const rv = $('rateVal');
-      rv.style.opacity = '0';
-      setTimeout(() => { rv.textContent = fmt(rate); rv.style.opacity = '1'; }, 180);
-      $('ratePair').textContent = fmtS(rate);
-      $('rateTs').textContent = 'Last fetched: ' + (rj.updated ?? '—');
-
-      const badgeEl = $('badge');
-      if (prevRate && prevRate > 0) {
-        const d = rate - prevRate;
-        const pct = (d / prevRate * 100).toFixed(3);
-        const cls = Math.abs(d) < 0.002 ? 'fl' : d > 0 ? 'up' : 'dn';
-        const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '≈';
-        const sgn = d >= 0 ? '+' : '';
-        badgeEl.innerHTML = `<span class="badge ${cls}">${arr} ${sgn}${fmtS(d)} (${sgn}${pct}%)</span>`;
-      } else {
-        badgeEl.innerHTML = '';
-      }
-      prevRate = rate;
-    }
-
-    // ── History list ──────────────────────────────────────────────────────────────
-    function renderList() {
-      $('cntBadge').textContent = history.length + ' entries';
-      if (!history.length) {
-        $('hlist').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No history yet.</div>';
-        return;
-      }
-      const rev = [...history].reverse();
-      $('hlist').innerHTML = rev.map((d, i) => {
-        const prev = rev[i + 1];
-        const diff = prev ? d.rate - prev.rate : null;
-        let dHtml = '';
-        if (diff !== null) {
-          const cls = Math.abs(diff) < 0.001 ? 'fl' : diff > 0 ? 'up' : 'dn';
-          const arr = cls === 'up' ? '▲' : cls === 'dn' ? '▼' : '';
-          dHtml = `<span class="dv ${cls}">${arr} ${diff >= 0 ? '+' : ''}${fmtS(diff)}</span>`;
-        }
-        const ts = new Date(d.time).toLocaleString('en-IN', {
-          day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
-        });
-        return `<div class="hrow">
+    const ts = new Date(d.time).toLocaleString('en-IN', {
+      day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true
+    });
+    return `<div class="hrow">
       <span class="ts">${ts}</span>
       <span style="display:flex;align-items:center">
         <span class="rv">${fmt(d.rate)}</span>${dHtml}
       </span>
     </div>`;
-      }).join('');
-    }
+  }).join('');
+}
 
-    // ── Stats ─────────────────────────────────────────────────────────────────────
-    function renderStats() {
-      if (!history.length) return;
-      const cutoff = new Date(Date.now() - 864e5);
-      const win = history.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
-      const w = win.length > 1 ? win : history.map(d => d.rate);
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function renderStats() {
+  if (!history.length) return;
+  const cutoff = new Date(Date.now() - 864e5);
+  const win = history.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
+  const w   = win.length > 1 ? win : history.map(d => d.rate);
 
-      $('sLow').textContent = fmt(Math.min(...w));
-      $('sHigh').textContent = fmt(Math.max(...w));
-      $('sPts').textContent = history.length;
+  $('sLow').textContent  = fmt(Math.min(...w));
+  $('sHigh').textContent = fmt(Math.max(...w));
+  $('sPts').textContent  = history.length;
 
-      const chg = w.at(-1) - w.at(0);
-      const ce = $('sChg');
-      ce.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
-      ce.className = 'sv ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'dn' : '');
-    }
+  const chg = w.at(-1) - w.at(0);
+  const ce  = $('sChg');
+  ce.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
+  ce.className   = 'sv ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'dn' : '');
+}
 
-    // ── Chart ─────────────────────────────────────────────────────────────────────
-    function renderChart() {
-      if (!history.length) return;
-      const labels = history.map(d => new Date(d.time));
-      const rates = history.map(d => d.rate);
+// ── Chart ─────────────────────────────────────────────────────────────────────
+function renderChart() {
+  if (!history.length) return;
+  const labels = history.map(d => new Date(d.time));
+  const rates  = history.map(d => d.rate);
 
-      const ctx = $('chart').getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 300);
-      grad.addColorStop(0, 'rgba(124,110,252,.35)');
-      grad.addColorStop(1, 'rgba(124,110,252,.00)');
+  const ctx  = $('chart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, 'rgba(124,110,252,.35)');
+  grad.addColorStop(1, 'rgba(124,110,252,.00)');
 
-      if (chartInst) chartInst.destroy();
-      chartInst = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'EUR → INR',
-            data: rates,
-            borderColor: '#7c6efc',
-            borderWidth: 2.5,
-            backgroundColor: grad,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: '#7c6efc',
-            pointHoverBorderColor: '#fff',
-            pointHoverBorderWidth: 2,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(8,10,26,.95)',
-              borderColor: 'rgba(255,255,255,.1)',
-              borderWidth: 1,
-              titleColor: '#94a3b8',
-              bodyColor: '#e2e8f0',
-              padding: 12,
-              callbacks: {
-                title: items => new Date(items[0].label).toLocaleString('en-IN', {
-                  day: '2-digit', month: 'short', year: 'numeric',
-                  hour: '2-digit', minute: '2-digit', hour12: true
-                }),
-                label: item => '  ₹' + item.raw.toFixed(4) + '  ·  Google Finance'
-              }
-            }
-          },
-          scales: {
-            x: {
-              type: 'time',
-              time: { displayFormats: { minute: 'HH:mm', hour: 'dd MMM ha', day: 'dd MMM' } },
-              grid: { color: 'rgba(255,255,255,.04)' },
-              ticks: { color: '#475569', maxTicksLimit: 8, maxRotation: 0 },
-              border: { color: 'rgba(255,255,255,.06)' }
-            },
-            y: {
-              grid: { color: 'rgba(255,255,255,.04)' },
-              ticks: { color: '#475569', callback: v => '₹' + v.toFixed(2), maxTicksLimit: 7 },
-              border: { color: 'rgba(255,255,255,.06)' }
-            }
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'EUR → INR',
+        data: rates,
+        borderColor: '#7c6efc',
+        borderWidth: 2.5,
+        backgroundColor: grad,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#7c6efc',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { display:false },
+        tooltip: {
+          backgroundColor: 'rgba(8,10,26,.95)',
+          borderColor: 'rgba(255,255,255,.1)',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#e2e8f0',
+          padding: 12,
+          callbacks: {
+            title: items => new Date(items[0].label).toLocaleString('en-IN', {
+              day:'2-digit', month:'short', year:'numeric',
+              hour:'2-digit', minute:'2-digit', hour12:true
+            }),
+            label: item => '  ₹' + item.raw.toFixed(4) + '  ·  Google Finance'
           }
         }
-      });
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { displayFormats: { minute:'HH:mm', hour:'dd MMM ha', day:'dd MMM' } },
+          grid:   { color:'rgba(255,255,255,.04)' },
+          ticks:  { color:'#475569', maxTicksLimit:8, maxRotation:0 },
+          border: { color:'rgba(255,255,255,.06)' }
+        },
+        y: {
+          grid:   { color:'rgba(255,255,255,.04)' },
+          ticks:  { color:'#475569', callback: v => '₹'+v.toFixed(2), maxTicksLimit:7 },
+          border: { color:'rgba(255,255,255,.06)' }
+        }
+      }
     }
+  });
+}
 
-    // ── Countdown ─────────────────────────────────────────────────────────────────
-    function startCountdown() {
-      countdown = 60;
-      timer = setInterval(() => {
-        countdown--;
-        $('nextLbl').textContent = `auto in ${countdown}s`;
-        if (countdown <= 0) { clearInterval(timer); loadAll(); }
-      }, 1000);
-    }
+// ── Countdown ─────────────────────────────────────────────────────────────────
+function startCountdown() {
+  countdown = 60;
+  timer = setInterval(() => {
+    countdown--;
+    $('nextLbl').textContent = `auto in ${countdown}s`;
+    if (countdown <= 0) { clearInterval(timer); loadAll(); }
+  }, 1000);
+}
 
-    // ── Boot ──────────────────────────────────────────────────────────────────────
-    loadAll();
-  </script>
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
 </body>
-
 </html>
