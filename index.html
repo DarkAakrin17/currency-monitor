@@ -34,7 +34,6 @@
       overflow-x: hidden;
     }
 
-    /* Animated background blobs */
     body::before, body::after {
       content: '';
       position: fixed;
@@ -61,12 +60,12 @@
     .page {
       position: relative;
       z-index: 1;
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
-      padding: 48px 24px 64px;
+      padding: 48px 24px 72px;
     }
 
-    /* Header */
+    /* ── Header ── */
     header {
       display: flex;
       flex-direction: column;
@@ -75,172 +74,212 @@
       margin-bottom: 40px;
     }
     .logo {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 12px;
+      font-weight: 600;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--accent2);
-      opacity: 0.8;
+      opacity: 0.85;
     }
     header h1 {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
       font-weight: 700;
       background: linear-gradient(135deg, #fff 30%, var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      line-height: 1.15;
     }
     .subtitle {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--muted);
-      margin-top: 4px;
     }
 
-    /* Glass card */
+    /* ── Glass card ── */
     .card {
       background: var(--glass);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    /* Rate hero */
-    .rate-hero {
-      padding: 36px 40px;
+    /* ── Top grid: live rate + history side-by-side on wide ── */
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 640px) { .top-grid { grid-template-columns: 1fr; } }
+
+    /* ── Live Rate ── */
+    .rate-card {
+      padding: 34px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      margin-bottom: 20px;
+      gap: 10px;
     }
-    .rate-label {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 2px;
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
+      background: rgba(6,182,212,0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(6,182,212,0.3);
     }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: livepulse 1.6s ease-in-out infinite;
+    }
+    @keyframes livepulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+    .rate-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
     .rate-value {
-      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-size: clamp(2.8rem, 7vw, 4.8rem);
       font-weight: 700;
       line-height: 1;
       background: linear-gradient(120deg, var(--accent2), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      transition: opacity 0.3s;
+      transition: opacity 0.25s;
     }
-    .rate-pair {
-      font-size: 15px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-    .rate-updated {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 14px;
-      opacity: 0.7;
-    }
+    .rate-pair { font-size: 13px; color: var(--muted); }
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 12px;
+      gap: 4px;
+      padding: 4px 12px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      margin-top: 14px;
     }
-    .badge.up   { background: rgba(52,211,153,0.15); color: var(--up);   border: 1px solid rgba(52,211,153,0.3);  }
-    .badge.down { background: rgba(248,113,113,0.15); color: var(--down); border: 1px solid rgba(248,113,113,0.3); }
-    .badge.flat { background: rgba(100,116,139,0.15); color: var(--muted); border: 1px solid rgba(100,116,139,0.3); }
+    .badge.up   { background: rgba(52,211,153,0.12); color: var(--up);   border: 1px solid rgba(52,211,153,0.3);  }
+    .badge.down { background: rgba(248,113,113,0.12); color: var(--down); border: 1px solid rgba(248,113,113,0.3); }
+    .badge.flat { background: rgba(100,116,139,0.12); color: var(--muted); border: 1px solid rgba(100,116,139,0.3); }
+    .rate-updated { font-size: 11px; color: var(--muted); opacity: 0.7; }
+    .refresh-btn {
+      margin-top: 4px;
+      background: rgba(124,110,252,0.15);
+      border: 1px solid rgba(124,110,252,0.3);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .refresh-btn:hover  { background: rgba(124,110,252,0.28); }
+    .refresh-btn:active { transform: scale(0.96); }
+    .refresh-btn.spin svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Stats row */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
+    /* ── History summary panel ── */
+    .history-card {
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
-    .stat-card {
-      padding: 22px 20px;
-      text-align: center;
-    }
-    .stat-label {
-      font-size: 11px;
+    .history-card h2 {
+      font-size: 14px;
       font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-size: 1.55rem;
-      font-weight: 700;
       color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .stat-value.up   { color: var(--up);   }
-    .stat-value.down { color: var(--down); }
-
-    /* Chart card */
-    .chart-card {
-      padding: 28px 24px 20px;
+    .history-card h2 span { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: auto; }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 240px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
-    .chart-header {
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+    .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .history-item:hover { background: rgba(255,255,255,0.07); }
+    .history-item .ts  { color: var(--muted); font-size: 11px; }
+    .history-item .val { font-weight: 600; }
+    .history-item .chg { font-size: 11px; font-weight: 600; margin-left: 10px; }
+    .chg.up   { color: var(--up);   }
+    .chg.down { color: var(--down); }
+    .chg.flat { color: var(--muted); }
+
+    /* ── Stats row ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .stat-card { padding: 22px 18px; text-align: center; }
+    .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-size: 1.45rem; font-weight: 700; color: var(--text); }
+    .stat-value.up   { color: var(--up);   }
+    .stat-value.down { color: var(--down); }
+
+    /* ── Chart card ── */
+    .chart-card { padding: 26px 22px 18px; }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
-    .chart-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .chart-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-    .dot {
+    .chart-title { font-size: 14px; font-weight: 600; }
+    .chart-sub   { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .pulse-dot {
       display: inline-block;
       width: 8px; height: 8px;
       border-radius: 50%;
-      background: var(--accent2);
-      animation: pulse 2s ease-in-out infinite;
+      background: var(--accent);
+      animation: pdot 2s ease-in-out infinite;
       margin-right: 6px;
     }
-    @keyframes pulse {
-      0%,100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.6); }
-      50%      { box-shadow: 0 0 0 6px rgba(6,182,212,0); }
+    @keyframes pdot {
+      0%,100% { box-shadow: 0 0 0 0 rgba(124,110,252,0.6); }
+      50%      { box-shadow: 0 0 0 6px rgba(124,110,252,0); }
     }
-    .chart-wrap { position: relative; height: 320px; }
+    .chart-wrap { position: relative; height: 300px; }
 
-    /* Footer */
     footer {
       text-align: center;
       margin-top: 48px;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
-      opacity: 0.6;
+      opacity: 0.55;
     }
     footer a { color: inherit; text-decoration: none; }
-
-    /* Skeleton loader */
-    .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.05) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-    }
-    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-    @media (max-width: 540px) {
-      .rate-hero { padding: 28px 20px; }
-      .chart-card { padding: 20px 14px 14px; }
-    }
   </style>
 </head>
 <body>
@@ -249,16 +288,37 @@
   <header>
     <span class="logo">Live Exchange Monitor</span>
     <h1>EUR → INR Tracker</h1>
-    <p class="subtitle">Powered by Google Finance · Updates every 5 minutes</p>
+    <p class="subtitle">Live rate via ECB · History updated every 5 min by GitHub Actions</p>
   </header>
 
-  <!-- Hero rate -->
-  <div class="card rate-hero">
-    <div class="rate-label">Current Exchange Rate</div>
-    <div class="rate-value" id="rateDisplay">—</div>
-    <div class="rate-pair">1 Euro = <span id="ratePairText">…</span> Indian Rupees</div>
-    <div id="changeBadge"></div>
-    <div class="rate-updated" id="updatedAt"></div>
+  <!-- Top: Live Rate + History log side-by-side -->
+  <div class="top-grid">
+
+    <!-- Live rate -->
+    <div class="card rate-card">
+      <span class="live-pill"><span class="live-dot"></span> Live</span>
+      <div class="rate-label">Current Exchange Rate</div>
+      <div class="rate-value" id="rateDisplay">—</div>
+      <div class="rate-pair">1 Euro = <span id="ratePairText">…</span> Indian Rupees</div>
+      <div id="changeBadge"></div>
+      <div class="rate-updated" id="updatedAt">Fetching…</div>
+      <button class="refresh-btn" id="refreshBtn" onclick="fetchLive()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Recent history log -->
+    <div class="card history-card">
+      <h2>
+        <span class="pulse-dot"></span>Recent History
+        <span id="histCount"></span>
+      </h2>
+      <div class="history-list" id="historyList">
+        <div style="color:var(--muted);font-size:13px;padding:8px">Loading…</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Stats -->
@@ -276,7 +336,7 @@
       <div class="stat-value" id="statChange">—</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-label">Data Points</div>
+      <div class="stat-label">History Points</div>
       <div class="stat-value" id="statPoints">—</div>
     </div>
   </div>
@@ -285,8 +345,8 @@
   <div class="card chart-card">
     <div class="chart-header">
       <div>
-        <div class="chart-title"><span class="dot"></span>Rate History</div>
-        <div class="chart-sub">Last 300 recorded entries (5-min intervals)</div>
+        <div class="chart-title"><span class="pulse-dot"></span>Rate History Chart</div>
+        <div class="chart-sub">Up to 300 recorded entries · 5-minute intervals</div>
       </div>
     </div>
     <div class="chart-wrap">
@@ -295,90 +355,151 @@
   </div>
 
   <footer>
-    Data sourced from <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a> ·
-    Alerts delivered via Telegram ·
-    &copy; EUR Monitor
+    Live rate from <a href="https://www.frankfurter.app/" target="_blank">Frankfurter / ECB</a> ·
+    History from <a href="https://www.google.com/finance/quote/EUR-INR" target="_blank">Google Finance</a> via GitHub Actions ·
+    Alerts via Telegram
   </footer>
-
 </div>
 
 <script>
-(async () => {
-  // ── Helpers ──────────────────────────────────────────────────────────────
-  const fmt  = v => v !== null && v !== undefined ? '₹' + Number(v).toFixed(4) : '—';
-  const fmtS = v => v !== null && v !== undefined ? Number(v).toFixed(4) : '—';
-  const el   = id => document.getElementById(id);
+// ── Globals ──────────────────────────────────────────────────────────────────
+const el = id => document.getElementById(id);
+const fmt  = v => '₹' + Number(v).toFixed(4);
+const fmtS = v => Number(v).toFixed(4);
 
-  // ── Load data ────────────────────────────────────────────────────────────
-  let data = [];
+let historyData   = [];
+let liveRate      = null;
+let prevLiveRate  = null;
+let chartInstance = null;
+
+// ── Live rate (Frankfurter / ECB) ────────────────────────────────────────────
+async function fetchLive() {
+  const btn = el('refreshBtn');
+  btn.classList.add('spin');
+  btn.disabled = true;
+  try {
+    const res  = await fetch('https://api.frankfurter.app/latest?from=EUR&to=INR');
+    const json = await res.json();
+    prevLiveRate = liveRate;
+    liveRate = json.rates.INR;
+    renderLive();
+  } catch (e) {
+    el('updatedAt').textContent = 'Error fetching live rate';
+  } finally {
+    btn.classList.remove('spin');
+    btn.disabled = false;
+  }
+}
+
+function renderLive() {
+  if (liveRate == null) return;
+
+  // Flicker animation
+  const rv = el('rateDisplay');
+  rv.style.opacity = '0';
+  setTimeout(() => {
+    rv.textContent = fmt(liveRate);
+    rv.style.opacity = '1';
+  }, 180);
+
+  el('ratePairText').textContent = fmtS(liveRate);
+
+  // Change vs previous live fetch OR first history point
+  const base = prevLiveRate ?? (historyData.length ? historyData[0].rate : null);
+  const badgeEl = el('changeBadge');
+  if (base) {
+    const diff = liveRate - base;
+    const pct  = (diff / base * 100).toFixed(3);
+    const sign = diff >= 0 ? '+' : '';
+    const cls  = Math.abs(diff) < 0.002 ? 'flat' : diff > 0 ? 'up' : 'down';
+    const arrow= cls === 'up' ? '▲' : cls === 'down' ? '▼' : '≈';
+    badgeEl.innerHTML = `<span class="badge ${cls}">${arrow} ${sign}${fmtS(diff)} (${sign}${pct}%)</span>`;
+  }
+
+  const now = new Date();
+  el('updatedAt').textContent = 'Live as of ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+}
+
+// ── History ──────────────────────────────────────────────────────────────────
+async function fetchHistory() {
   try {
     const res = await fetch('history.json');
-    data = await res.json();
+    historyData = await res.json();
   } catch {
-    el('rateDisplay').textContent = 'Error loading data';
+    el('historyList').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Could not load history.json</div>';
+    return;
+  }
+  renderHistoryList();
+  renderStats();
+  renderChart();
+}
+
+function renderHistoryList() {
+  const list = el('historyList');
+  if (!historyData.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No history yet.</div>';
     return;
   }
 
-  if (!data.length) {
-    el('rateDisplay').textContent = 'No data yet';
-    return;
-  }
+  // Show newest first
+  const reversed = [...historyData].reverse();
+  el('histCount').textContent = historyData.length + ' entries';
 
-  const rates  = data.map(d => d.rate);
-  const labels = data.map(d => new Date(d.time));
+  list.innerHTML = reversed.map((d, i) => {
+    const prev = reversed[i + 1];
+    const diff = prev ? d.rate - prev.rate : 0;
+    const cls  = Math.abs(diff) < 0.001 ? 'flat' : diff > 0 ? 'up' : 'down';
+    const arrow= cls === 'up' ? '▲' : cls === 'down' ? '▼' : '';
+    const chgStr = prev ? `${arrow} ${diff >= 0 ? '+' : ''}${diff.toFixed(4)}` : '';
 
-  // ── Current rate ─────────────────────────────────────────────────────────
-  const current  = rates.at(-1);
-  el('rateDisplay').textContent = fmt(current);
-  el('ratePairText').textContent = fmtS(current);
+    const ts = new Date(d.time).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
 
-  // Updated at
-  const lastTime = labels.at(-1);
-  el('updatedAt').textContent = 'Last updated: ' + lastTime.toLocaleString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
+    return `
+      <div class="history-item">
+        <span class="ts">${ts}</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span class="val">${fmt(d.rate)}</span>
+          <span class="chg ${cls}">${chgStr}</span>
+        </span>
+      </div>`;
+  }).join('');
+}
 
-  // ── Change badge ─────────────────────────────────────────────────────────
-  const first = rates.at(0);
-  const diff  = current - first;
-  const pct   = (diff / first * 100).toFixed(2);
-  const badgeEl = el('changeBadge');
-  if (Math.abs(diff) < 0.005) {
-    badgeEl.innerHTML = `<span class="badge flat">≈ Stable</span>`;
-  } else if (diff > 0) {
-    badgeEl.innerHTML = `<span class="badge up">▲ +${fmtS(diff)} (${pct}%) vs first entry</span>`;
-  } else {
-    badgeEl.innerHTML = `<span class="badge down">▼ ${fmtS(diff)} (${pct}%) vs first entry</span>`;
-  }
+function renderStats() {
+  const rates = historyData.map(d => d.rate);
+  if (!rates.length) return;
 
-  // ── 24 h window stats ────────────────────────────────────────────────────
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const recent = data.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
-  const window = recent.length > 1 ? recent : rates;
+  const win    = historyData.filter(d => new Date(d.time) >= cutoff).map(d => d.rate);
+  const w      = win.length > 1 ? win : rates;
 
-  const lo  = Math.min(...window);
-  const hi  = Math.max(...window);
-  const chg = window.at(-1) - window.at(0);
+  el('statLow').textContent  = fmt(Math.min(...w));
+  el('statHigh').textContent = fmt(Math.max(...w));
+  el('statPoints').textContent = historyData.length;
 
-  el('statLow').textContent  = fmt(lo);
-  el('statHigh').textContent = fmt(hi);
-
-  const chgEl = el('statChange');
+  const chg    = w.at(-1) - w.at(0);
+  const chgEl  = el('statChange');
   chgEl.textContent = (chg >= 0 ? '+' : '') + fmtS(chg);
   chgEl.className = 'stat-value ' + (chg > 0.005 ? 'up' : chg < -0.005 ? 'down' : '');
+}
 
-  el('statPoints').textContent = data.length;
+function renderChart() {
+  if (!historyData.length) return;
 
-  // ── Chart ─────────────────────────────────────────────────────────────────
+  const labels = historyData.map(d => new Date(d.time));
+  const rates  = historyData.map(d => d.rate);
+
   const ctx = el('rateChart').getContext('2d');
-
-  // Gradient fill
-  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
   gradient.addColorStop(0, 'rgba(124,110,252,0.35)');
   gradient.addColorStop(1, 'rgba(124,110,252,0.00)');
 
-  new Chart(ctx, {
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
@@ -404,20 +525,16 @@
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(10,12,28,0.92)',
+          backgroundColor: 'rgba(8,10,26,0.94)',
           borderColor: 'rgba(255,255,255,0.10)',
           borderWidth: 1,
           titleColor: '#94a3b8',
           bodyColor: '#e2e8f0',
           padding: 12,
           callbacks: {
-            title: items => {
-              const d = new Date(items[0].label);
-              return d.toLocaleString('en-IN', {
-                day: '2-digit', month: 'short',
-                hour: '2-digit', minute: '2-digit', hour12: true
-              });
-            },
+            title: items => new Date(items[0].label).toLocaleString('en-IN', {
+              day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true
+            }),
             label: item => '  ₹' + item.raw.toFixed(4)
           }
         }
@@ -425,23 +542,28 @@
       scales: {
         x: {
           type: 'time',
-          time: { tooltipFormat: 'dd MMM, hh:mm a', displayFormats: { hour: 'dd MMM ha', day: 'dd MMM' } },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#475569', maxTicksLimit: 8, maxRotation: 0 },
+          time: { displayFormats: { hour: 'dd MMM ha', day: 'dd MMM' } },
+          grid:   { color: 'rgba(255,255,255,0.04)' },
+          ticks:  { color: '#475569', maxTicksLimit: 8, maxRotation: 0 },
           border: { color: 'rgba(255,255,255,0.06)' }
         },
         y: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: {
-            color: '#475569',
-            callback: v => '₹' + v.toFixed(2),
-            maxTicksLimit: 7
-          },
+          grid:   { color: 'rgba(255,255,255,0.04)' },
+          ticks:  { color: '#475569', callback: v => '₹' + v.toFixed(2), maxTicksLimit: 7 },
           border: { color: 'rgba(255,255,255,0.06)' }
         }
       }
     }
   });
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+(async () => {
+  await Promise.all([fetchLive(), fetchHistory()]);
+  // Auto-refresh live rate every 60 s
+  setInterval(fetchLive, 60_000);
+  // Reload history every 5 min (aligns with GitHub Actions cadence)
+  setInterval(fetchHistory, 5 * 60_000);
 })();
 </script>
 </body>
