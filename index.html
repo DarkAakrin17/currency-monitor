@@ -219,8 +219,9 @@ const $    = id => document.getElementById(id);
 const fmt  = v  => '₹' + Number(v).toFixed(4);
 const fmtS = v  => Number(v).toFixed(4);
 
-// Yahoo Finance chart API (no API key needed, CORS OK via query2)
-const YF_BASE = 'https://query2.finance.yahoo.com/v8/finance/chart/EURINR=X';
+// Yahoo Finance chart API — routed through corsproxy.io to bypass CORS
+const YF_DIRECT = 'https://query1.finance.yahoo.com/v8/finance/chart/EURINR=X';
+const PROXY     = 'https://corsproxy.io/?';
 
 let prevRate  = null;
 let chartInst = null;
@@ -243,10 +244,11 @@ function showError(msg) {
 }
 function clearError() { $('errBanner').style.display = 'none'; }
 
-// ── Fetch from Yahoo Finance ──────────────────────────────────────────────────
+// ── Fetch from Yahoo Finance via CORS proxy ──────────────────────────────────
 async function yahooFetch(params) {
-  const url  = YF_BASE + '?' + new URLSearchParams(params);
-  const resp = await fetch(url);
+  const yfUrl = YF_DIRECT + '?' + new URLSearchParams(params);
+  const url   = PROXY + encodeURIComponent(yfUrl);
+  const resp  = await fetch(url);
   if (!resp.ok) throw new Error(`Yahoo Finance returned ${resp.status}`);
   const json = await resp.json();
   const res  = json?.chart?.result?.[0];
