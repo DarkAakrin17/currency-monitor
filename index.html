@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EUR → INR Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #111;
+      color: white;
+    }
+    canvas {
+      max-width: 800px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>💱 EUR → INR Monitor</h1>
+<h2 id="current">Loading...</h2>
+
+<canvas id="chart"></canvas>
+
+<script>
+async function loadData() {
+  const res = await fetch('history.json');
+  const data = await res.json();
+
+  const labels = data.map(d => new Date(d.time).toLocaleTimeString());
+  const rates = data.map(d => d.rate);
+
+  document.getElementById("current").innerText =
+    "Current Rate: ₹" + rates[rates.length - 1];
+
+  new Chart(document.getElementById("chart"), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'EUR → INR',
+        data: rates,
+        borderColor: 'cyan',
+        fill: false,
+        tension: 0.3
+      }]
+    }
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
