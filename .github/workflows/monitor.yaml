@@ -2,35 +2,38 @@ name: Currency Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *"   # every 5 minutes
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  run-script:
+  monitor:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run script
+      - name: Fetch rate & send alerts
         run: python check_rate.py
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
+          CHAT_ID:   ${{ secrets.CHAT_ID }}
 
       - name: Commit updated data
         run: |
-          git config --global user.name "bot"
-          git config --global user.email "bot@example.com"
+          git config --global user.name  "currency-bot"
+          git config --global user.email "bot@users.noreply.github.com"
           git add rate.json history.json
-          git commit -m "Update rates" || echo "No changes"
+          git diff --cached --quiet || git commit -m "chore: update EUR/INR rates [skip ci]"
           git push
