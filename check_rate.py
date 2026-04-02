@@ -2,35 +2,49 @@ import requests
 import json
 import os
 import datetime
+import re
 
 RATE_FILE    = "rate.json"
 HISTORY_FILE = "history.json"
 
-YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/EURINR=X"
-HEADERS   = {
+HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json",
+    )
 }
 
-# ── Yahoo Finance ────────────────────────────────────────────────────────────
+# ── Google Finance ────────────────────────────────────────────────────────────
 def get_rate():
-    """Fetch current EUR → INR mid-market rate from Yahoo Finance."""
-    params = {"interval": "1m", "range": "1d"}
-    resp   = requests.get(YAHOO_URL, headers=HEADERS, params=params, timeout=10)
+    """Fetch EUR → INR mid-market rate from Google Finance."""
+    resp = requests.get(
+        "https://www.google.com/finance/quote/EUR-INR",
+        headers=HEADERS, timeout=10
+    )
     resp.raise_for_status()
-    result = resp.json()["chart"]["result"][0]
-    return float(result["meta"]["regularMarketPrice"])
+
+    # Primary: data-last-price attribute
+    m = re.search(r'data-last-price="([0-9.]+)"', resp.text)
+    if m:
+        return float(m.group(1))
+
+    # Fallback: YMlKec fxKbKc span
+    m = re.search(r'class="YMlKec fxKbKc"[^>]*>([0-9,]+\.[0-9]+)<', resp.text)
+    if m:
+        return float(m.group(1).replace(",", ""))
+
+    raise ValueError("Could not parse EUR-INR rate from Google Finance page")
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
 def send_telegram(msg):
     token   = os.environ["BOT_TOKEN"]
     chat_id = os.environ["CHAT_ID"]
-    url     = f"https://api.telegram.org/bot{token}/sendMessage"
-    requests.post(url, data={"chat_id": chat_id, "text": msg, "parse_mode": "HTML"}, timeout=10)
+    requests.post(
+        f"https://api.telegram.org/bot{token}/sendMessage",
+        data={"chat_id": chat_id, "text": msg, "parse_mode": "HTML"},
+        timeout=10
+    )
 
 # ── Persistence ───────────────────────────────────────────────────────────────
 def load_last_rate():
@@ -44,20 +58,16 @@ def save_rate(rate, now_ist):
         json.dump({
             "rate":    rate,
             "updated": now_ist.strftime("%Y-%m-%d %H:%M IST"),
-            "source":  "Yahoo Finance"
+            "source":  "Google Finance"
         }, f)
 
 def update_history(rate, now_ist):
-    entry = {"time": now_ist.isoformat(), "rate": rate}
-
     data = []
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE) as f:
             data = json.load(f)
-
-    data.append(entry)
-    data = data[-300:]   # keep last 300 entries
-
+    data.append({"time": now_ist.isoformat(), "rate": rate})
+    data = data[-300:]
     with open(HISTORY_FILE, "w") as f:
         json.dump(data, f)
 
@@ -67,15 +77,15 @@ def build_alert(last, current, now_str):
     pct  = abs(diff) / last * 100
     if abs(diff) < 0.10:
         return None
-    arrow  = "📈" if diff > 0 else "📉"
-    word   = "Rose" if diff > 0 else "Dropped"
-    sign   = "+" if diff > 0 else ""
+    arrow = "📈" if diff > 0 else "📉"
+    word  = "Rose" if diff > 0 else "Dropped"
+    sign  = "+" if diff > 0 else ""
     return (
         f"{arrow} <b>EUR/INR {word}!</b>\n"
         f"Previous : ₹{last:.4f}\n"
         f"Current  : ₹{current:.4f}\n"
         f"Change   : {sign}₹{diff:.4f}  ({sign}{pct:.2f}%)\n"
-        f"Source   : Yahoo Finance\n"
+        f"Source   : Google Finance\n"
         f"🕐 {now_str}"
     )
 
@@ -84,10 +94,10 @@ def main():
     now_ist = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
     now_str = now_ist.strftime("%d %b %Y, %I:%M %p IST")
 
-    current  = get_rate()
-    last     = load_last_rate()
+    current = get_rate()
+    last    = load_last_rate()
 
-    print(f"[{now_str}] EUR → INR: ₹{current:.4f}  (Yahoo Finance)")
+    print(f"[{now_str}] EUR → INR: ₹{current:.4f}  (Google Finance)")
 
     if last and last > 0:
         alert = build_alert(last, current, now_str)
